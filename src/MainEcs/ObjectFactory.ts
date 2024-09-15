@@ -118,19 +118,19 @@ export function makeHelper(
   return helper;
 }
 
-export function createCustomGrid(size = 120) {
+export function createCustomGrid(size = 60) {
   const GRID_COLORS_LIGHT = [0x999999, 0x777777];
   const GRID_COLORS_DARK = [0x555555, 0x888888];
 
   const grid = new THREE.Group();
 
   const grid1 = new THREE.GridHelper(size, size);
-  grid1.material.color.setHex(GRID_COLORS_DARK[0]);
+  grid1.material.color.setHex(GRID_COLORS_LIGHT[0]);
   grid1.material.vertexColors = false;
   grid.add(grid1);
 
   const grid2 = new THREE.GridHelper(size, 6);
-  grid2.material.color.setHex(GRID_COLORS_DARK[1]);
+  grid2.material.color.setHex(GRID_COLORS_LIGHT[1]);
   grid2.material.vertexColors = false;
   grid.add(grid2);
   return grid;

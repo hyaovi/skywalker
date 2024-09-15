@@ -100,10 +100,3 @@ class TestTimable {
 }
 
 
-export function createAnchor(): HTMLAnchorElement {
-  type urlType = "mail" | "tel" | undefined;
-  const a = document.createElement("a");
-  a.target = "_blank";
-  a.rel = "no-referrer";
-  return a;
-}
