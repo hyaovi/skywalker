@@ -82,7 +82,7 @@ export function makeHelper(
     | THREE.HemisphereLight
     | THREE.SkinnedMesh
     | THREE.Bone
-): THREE.Object3D | undefined {
+) {
   let helper;
   const color = 0xd3d3d3;
 
@@ -122,16 +122,24 @@ export function createCustomGrid(size = 60) {
   const GRID_COLORS_LIGHT = [0x999999, 0x777777];
   const GRID_COLORS_DARK = [0x555555, 0x888888];
 
-  const grid = new THREE.Group();
 
-  const grid1 = new THREE.GridHelper(size, size);
-  grid1.material.color.setHex(GRID_COLORS_LIGHT[0]);
-  grid1.material.vertexColors = false;
-  grid.add(grid1);
-
-  const grid2 = new THREE.GridHelper(size, 6);
-  grid2.material.color.setHex(GRID_COLORS_LIGHT[1]);
-  grid2.material.vertexColors = false;
-  grid.add(grid2);
+  const grid = new THREE.GridHelper(size, size);
+  grid.material.color.setHex(GRID_COLORS_LIGHT[0]);
+  grid.material.opacity = 0.25;
+  grid.material.transparent = true;
+  grid.material.vertexColors = false;
   return grid;
+}
+
+export function makeGround(size: number = 1000) {
+  const geometry = new THREE.PlaneGeometry(size, size);
+  const material = new THREE.MeshPhongMaterial({
+    color: 0x999999,
+    shininess: 0,
+    specular: 0x111111,
+  });
+  const ground = new THREE.Mesh(geometry, material);
+  ground.castShadow = true;
+  ground.receiveShadow = true;
+  return ground;
 }

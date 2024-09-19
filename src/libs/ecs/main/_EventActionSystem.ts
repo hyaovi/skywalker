@@ -1,5 +1,5 @@
-import { BaseComponent, System } from "../BaseEcs";
-import { EVENT_NAMES } from "../BaseEcs/EventManager";
+import { BaseComponent, System } from "../base";
+import { EVENT_NAMES } from "../base/EventManager";
 import { Entity } from ".";
 
 type ActionExcecuteFunctionType = (entity: Entity) => void;
@@ -53,7 +53,6 @@ export class EventActionSystem extends System<Entity> {
 
     this.subscribe(EVENT_NAMES.componentAddedToEntity, () => {
       this.getEntities().forEach((entity) => {
-        console.log("@@ should build action");
         this.buildEntityActions(entity);
       });
     });
@@ -86,7 +85,6 @@ export class EventActionSystem extends System<Entity> {
           entity.on(eventName, eventCallback);
 
           actionData.isSet = true;
-          console.log(eventName,'###', entity.started)
           if (eventName === "start" && entity.started) {
             eventCallback();
           }

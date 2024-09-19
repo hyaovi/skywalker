@@ -11,7 +11,14 @@ interface ILifecycles {
 }
 
 const globalEventManager = new EventManager();
-
+function loopThroughMapValues<MapItemtype>(
+  map: Map<string, MapItemtype>,
+  cb: (item: MapItemtype) => void
+) {
+  for (const item of map.values()) {
+    cb(item);
+  }
+}
 export abstract class Base implements ILifecycles {
   inited: boolean;
   started: boolean;
@@ -241,16 +248,16 @@ export class BaseEntityManager<
   getEntityById(entityId: EntityType["id"]) {
     return this.entities.get(entityId);
   }
-  loopOverEntities(cb: (entity: EntityType) => void) {
+  loopOverEntities(callback: (entity: EntityType) => void) {
     for (const entity of this.entities.values()) {
-      cb(entity);
+      callback(entity);
     }
   }
   getEntitiesByComponentType(componentTypes: string[]): EntityType[] {
     const entities: EntityType[] = [];
     this.loopOverEntities((entity) => {
       componentTypes.forEach((componentType) => {
-        if (entity.hasComponentType(componentType)) {
+        if (entity.hasComponentType(componentType) || componentType === "*") {
           entities.push(entity);
         }
       });
@@ -310,9 +317,9 @@ export class BaseSystemManager<EntityType extends BaseEntity> extends Base {
     this.loopOverSystems((system) => system.resume());
   }
   // systems related methods
-  loopOverSystems(cb: (system: System<EntityType>) => void) {
+  loopOverSystems(callback: (system: System<EntityType>) => void) {
     for (const system of this.systems.values()) {
-      cb(system);
+      callback(system);
     }
   }
 
@@ -407,10 +414,13 @@ export class Looper {
   }
 }
 export class BaseEngine<
-  EntityType extends BaseEntity = BaseEntity,
-  EntityManagertype extends BaseEntityManager<EntityType> = BaseEntityManager<EntityType>,
-  SystemManagerType extends BaseSystemManager<EntityType> = BaseSystemManager<EntityType>
-> extends Base {
+    EntityType extends BaseEntity = BaseEntity,
+    EntityManagertype extends BaseEntityManager<EntityType> = BaseEntityManager<EntityType>,
+    SystemManagerType extends BaseSystemManager<EntityType> = BaseSystemManager<EntityType>
+  >
+  extends Base
+  implements ILifecycles
+{
   systemManager: SystemManagerType;
   entityManager: EntityManagertype;
   looper: Looper = new Looper();
@@ -454,5 +464,12 @@ export class BaseEngine<
   }
   get events() {
     return globalEventManager.events;
+  }
+  get context() {
+    const { getEntityById, createEntity } = this.entityManager;
+    return {
+      getEntityById,
+      createEntity,
+    };
   }
 }

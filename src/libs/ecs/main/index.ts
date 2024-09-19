@@ -5,23 +5,23 @@ import {
   BaseEntity,
   BaseEntityManager,
   BaseSystemManager,
-  System,
-} from "../BaseEcs";
-import { EVENT_NAMES } from "../BaseEcs/EventManager";
-import { createPrimitiveMesh, makeHelper } from "./ObjectFactory";
-import { Object3DType } from "../sharedTypes";
+} from "../base";
+import { EVENT_NAMES } from "../base/EventManager";
+import { createPrimitiveMesh } from "./ObjectFactory";
+import { Object3DType, ObjectHelperType } from "../sharedTypes";
+import { pointerEvents } from "./ViewportSystem";
 
 export class Entity extends BaseEntity {
   isInteractive: boolean;
   object3d: Object3DType;
-  helper!: THREE.BoxHelper;
+  helper!: ObjectHelperType;
   isOnScene: boolean;
-  constructor() {
+  constructor(object3d?: Object3DType) {
     super();
     this.isInteractive = true;
     this.isOnScene = false;
-    this.object3d = createPrimitiveMesh({ type: "box" });
-    // this.helper = makeHelper(this.object3d);
+    this.object3d = object3d || createPrimitiveMesh({ type: "box" });
+    // this.makeHelper();
   }
   // 3d object methods
   setObject3D(object: THREE.Object3D) {
@@ -29,18 +29,39 @@ export class Entity extends BaseEntity {
   }
 }
 
+export abstract class Behavior extends BaseComponent {
+  static isBehavior: boolean = true;
+  onClick() {
+    throw new Error(`onClick method is not implmented`);
+  }
+  onPointerDown() {
+    throw new Error(`onPointerDown method is not implmented`);
+  }
+  onPointerUp() {
+    throw new Error(`onPointerUp method is not implmented`);
+  }
+  onPointerOver() {
+    throw new Error(`onPointerOver method is not implmented`);
+  }
+}
+
 export class SystemManager extends BaseSystemManager<Entity> {}
 export class EntityManager extends BaseEntityManager<Entity> {
-  createEntity(): Entity {
-    const entity = new Entity();
+  createEntity(object?: Object3DType): Entity {
+    const entity = new Entity(object);
     return this.addEntity(entity);
   }
   init(): void {
     if (this.inited) return;
-    this.subscribe(EVENT_NAMES.entityClicked, (data: { entityId: string }) => {
-      const { entityId } = data;
-      const entity = this.getEntityById(entityId);
-      entity?.emit(EVENT_NAMES.click);
+    pointerEvents.forEach((pointerEventName) => {
+      this.subscribe(
+        `entity-${pointerEventName}`,
+        (data: { entityId: string }) => {
+          const { entityId } = data;
+          const entity = this.getEntityById(entityId);
+          entity?.emit(pointerEventName);
+        }
+      );
     });
     super.init();
   }

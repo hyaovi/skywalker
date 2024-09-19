@@ -66,5 +66,8 @@ export const EVENT_NAMES = {
   engineStarted: "engine-started",
   engineUpdate: "engine-update",
 
+  requestNewEntity:'entity-manager-request-new-entity',
+  activateEntity:'entity-manager-request-new-entity',
+
   click: "click",
 };
