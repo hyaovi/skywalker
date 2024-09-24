@@ -2,7 +2,13 @@ import { Engine } from "./libs/ecs/main/Engine.ts";
 
 import { _setupWorld } from "./libs/ecs/utils.ts";
 
-const engine = new Engine();
+const engine = new Engine({
+  viewport: {
+    useShadow: false,
+    useTransformControls: false,
+    useHelper: false,
+  },
+});
 
 engine.subscribeOnce("engine-started", () => {
   _setupWorld(engine);

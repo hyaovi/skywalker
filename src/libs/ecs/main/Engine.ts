@@ -1,16 +1,22 @@
 import { BaseEngine, Entity, EntityManager, SystemManager } from ".";
-import { ViewportSystem } from "./ViewportSystem";
+import {
+  defaultViewportSetting,
+  IViewportParams,
+  ViewportSystem,
+} from "./ViewportSystem";
 import { EVENT_NAMES } from "../base/EventManager";
 
+interface IEngineSettings {
+  viewport?: IViewportParams;
+}
+const defaultEngineSettings: IEngineSettings = {
+  viewport: defaultViewportSetting,
+};
 export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
   viewport: ViewportSystem;
-  constructor() {
+  constructor(settings?: IEngineSettings) {
     super(new EntityManager(), new SystemManager());
-    this.viewport = new ViewportSystem({
-      useShadow: false,
-      useTransformControls: false,
-      useHelper: false,
-    });
+    this.viewport = new ViewportSystem(settings?.viewport);
 
     this.viewport.getObjects = this.entityManager.getObjects3d.bind(
       this.entityManager
@@ -21,7 +27,7 @@ export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
     super.init();
     this.systemManager.addSystem(this.viewport);
     this.inited = true;
-    this.broadcast(EVENT_NAMES.engineInited)
+    this.broadcast(EVENT_NAMES.engineInited);
   }
   start(): void {
     if (this.started) return;

@@ -7,7 +7,7 @@ import { EVENT_NAMES } from "../base/EventManager";
 import { Object3DType, ObjectHelperType } from "../sharedTypes";
 import { makeHelper } from "./ObjectFactory";
 
-interface IViewportParams {
+export interface IViewportParams {
   clearColor?: number | THREE.Color;
   useShadow?: boolean;
   useHelper?: boolean;
@@ -21,7 +21,7 @@ interface IViewportSettings extends IViewportParams {
   useTransformControls: boolean;
   size: number;
 }
-const defaultSetting: IViewportSettings = {
+export const defaultViewportSetting: IViewportSettings = {
   clearColor: 0xbdc5c9,
   useShadow: true,
   useHelper: true,
@@ -112,11 +112,11 @@ export class ViewportSystem extends System<Entity> {
     object: Object3DType;
   };
   highlightedHelper!: ObjectHelperType;
-  settings: IViewportSettings = { ...defaultSetting };
+  settings: IViewportSettings = { ...defaultViewportSetting };
   constructor(settings?: IViewportParams) {
     const componentsTypes = ["*"]; //needs all entities
     super(componentsTypes);
-    this.settings = { ...this.settings, ...defaultSetting, ...settings };
+    this.settings = { ...this.settings, ...defaultViewportSetting, ...settings };
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
