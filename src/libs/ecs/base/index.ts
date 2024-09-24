@@ -11,14 +11,7 @@ interface ILifecycles {
 }
 
 const globalEventManager = new EventManager();
-function loopThroughMapValues<MapItemtype>(
-  map: Map<string, MapItemtype>,
-  cb: (item: MapItemtype) => void
-) {
-  for (const item of map.values()) {
-    cb(item);
-  }
-}
+
 export abstract class Base implements ILifecycles {
   inited: boolean;
   started: boolean;
@@ -49,16 +42,19 @@ export class BaseComponent extends Base {
   entityId!: string;
   independant: boolean = false;
   data: { [key: string]: any };
+  readonly isBehavior: boolean;
   readonly componentType: string;
   constructor() {
     super();
     this.data = {};
     this.componentType = this.constructor.name;
+    this.isBehavior = false;
   }
   destroy() {
     this.data = {};
   }
 }
+
 export class BaseEntity extends EventManager implements ILifecycles {
   inited: boolean;
   started: boolean;

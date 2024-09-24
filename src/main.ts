@@ -1,3 +1,4 @@
+import { Behavior } from "./libs/ecs/main/index.ts";
 import { Engine } from "./libs/ecs/main/Engine.ts";
 
 import { _setupWorld } from "./libs/ecs/utils.ts";
@@ -20,6 +21,16 @@ engine.run();
 
 document.querySelector("#app")?.appendChild(engine.viewport.domElement);
 
+class LogClick extends Behavior{
+  constructor(){
+    super();
+    this.eventType = 'pointermove';
+  }
+ action(args: any): void {
+   console.log('gloh clock from', args)
+ }
+}
+
 const viewportSystem = engine.viewport;
 Array(10)
   .fill(null)
@@ -35,6 +46,8 @@ Array(10)
       entity.object3d.rotation.x += 0.01 * Math.random();
       entity.object3d.rotation.y += 0.02 * Math.random();
     });
+    entity.on('click', function(data){console.log('@@ clicked', data)})
+    entity.addComponent(new LogClick())
 
     engine.entityManager.activateEntity(entity);
 

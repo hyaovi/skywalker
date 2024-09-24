@@ -9,7 +9,28 @@ import {
 import { EVENT_NAMES } from "../base/EventManager";
 import { createPrimitiveMesh } from "./ObjectFactory";
 import { Object3DType, ObjectHelperType } from "../sharedTypes";
-import { pointerEvents } from "./ViewportSystem";
+import { pointerEvents, pointerEventsType } from "./ViewportSystem";
+
+export class Behavior extends BaseComponent {
+  readonly isBehavior: boolean;
+  eventType?: pointerEventsType;
+  _action!: <T>(args: T) => void;
+  constructor(eventType?: pointerEventsType, action?: Behavior["_action"]) {
+    super();
+    this.isBehavior = true;
+    if (eventType) this.eventType = eventType;
+    if (action) this._action = action;
+    this.action = this.action.bind(this);
+  }
+
+  action(args: any) {
+    if (this._action) {
+      this._action(args);
+      return;
+    }
+    throw new Error(`The "action" method is not implemented!`);
+  }
+}
 
 export class Entity extends BaseEntity {
   isInteractive: boolean;
@@ -27,21 +48,19 @@ export class Entity extends BaseEntity {
   setObject3D(object: THREE.Object3D) {
     this.object3d = object;
   }
-}
 
-export abstract class Behavior extends BaseComponent {
-  static isBehavior: boolean = true;
-  onClick() {
-    throw new Error(`onClick method is not implmented`);
+  addComponent(component: BaseComponent | Behavior) {
+    super.addComponent(component);
+    if (component.isBehavior) {
+      const { eventType, action } = component as Behavior;
+      if (eventType) {
+        this.on(eventType, action);
+      }
+    }
   }
-  onPointerDown() {
-    throw new Error(`onPointerDown method is not implmented`);
-  }
-  onPointerUp() {
-    throw new Error(`onPointerUp method is not implmented`);
-  }
-  onPointerOver() {
-    throw new Error(`onPointerOver method is not implmented`);
+  addBehavior(event: pointerEventsType, action: Behavior["_action"]) {
+    const behavior = new Behavior(event, action);
+    this.addComponent(behavior);
   }
 }
 
@@ -56,10 +75,10 @@ export class EntityManager extends BaseEntityManager<Entity> {
     pointerEvents.forEach((pointerEventName) => {
       this.subscribe(
         `entity-${pointerEventName}`,
-        (data: { entityId: string }) => {
-          const { entityId } = data;
+        (data: { entityId: string; event: PointerEvent | MouseEvent }) => {
+          const { entityId, event } = data;
           const entity = this.getEntityById(entityId);
-          entity?.emit(pointerEventName);
+          entity?.emit(pointerEventName, { event });
         }
       );
     });

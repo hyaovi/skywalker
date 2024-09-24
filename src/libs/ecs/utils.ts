@@ -64,7 +64,14 @@ function createStats() {
 export const sleep = async (time = 1000) =>
   new Promise<void>((resolve) => setTimeout(resolve, time));
 
-
+export function loopThroughMapValues<MapItemtype>(
+  map: Map<string, MapItemtype>,
+  cb: (item: MapItemtype) => void
+) {
+  for (const item of map.values()) {
+    cb(item);
+  }
+}
 
 
 

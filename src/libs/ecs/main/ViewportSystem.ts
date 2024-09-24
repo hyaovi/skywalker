@@ -236,7 +236,7 @@ export class ViewportSystem extends System<Entity> {
     const selected = this.intersect(event);
     if (selected) {
       this.broadcast(`entity-${event.type}`, {
-        entityId: selected.entityId,
+        entityId: selected.entityId, event
       });
 
       // handle event by type
