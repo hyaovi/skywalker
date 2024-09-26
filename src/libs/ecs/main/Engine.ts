@@ -40,11 +40,11 @@ export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
     this.start();
   }
   get context() {
-    const superContext = super.context;
     const {
       scene,
       renderer,
       camera,
+      mixer,
       controls: { transform, orbit },
     } = this.viewport;
     return {
@@ -53,7 +53,8 @@ export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
       camera,
       orbit,
       transform,
-      ...superContext,
+      mixer,
+      ...super.context,
     };
   }
 }

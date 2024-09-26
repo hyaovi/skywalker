@@ -104,7 +104,7 @@ export class BaseEntity extends EventManager implements ILifecycles {
   broadcast = globalEventManager.emit.bind(globalEventManager);
   subscribe = globalEventManager.on.bind(globalEventManager);
   unsubscribe = globalEventManager.off.bind(globalEventManager);
-  broadcastOnce = globalEventManager.once.bind(globalEventManager);
+  subscribeOnce = globalEventManager.once.bind(globalEventManager);
 
   // components methods
   loopOverComponents(callback: (component: BaseComponent) => void) {

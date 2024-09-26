@@ -13,20 +13,23 @@ export interface IViewportParams {
   useHelper?: boolean;
   useTransformControls?: boolean;
   size?: number;
+  useRenderOnDemand?:boolean;
 }
 interface IViewportSettings extends IViewportParams {
   clearColor: number | THREE.Color;
   useShadow: boolean;
   useHelper: boolean;
   useTransformControls: boolean;
+  useRenderOnDemand:boolean;
   size: number;
 }
 export const defaultViewportSetting: IViewportSettings = {
-  clearColor: 0xbdc5c9,
+  clearColor: 0xd1d3d0,
   useShadow: true,
   useHelper: true,
   useTransformControls: true,
   size: 150,
+  useRenderOnDemand:false
 };
 
 export const pointerEvents = [
@@ -100,9 +103,11 @@ export class ViewportSystem extends System<Entity> {
   sceneHelper: THREE.Scene;
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
+  mixer: THREE.AnimationMixer;
   // controls
   controls: Controls;
-  useRenderOnDemand: boolean = false;
+  useRenderOnDemand: boolean;
+  shouldRender: boolean;
   inited: boolean = false;
   raycaster: THREE.Raycaster;
   pointer: THREE.Vector2;
@@ -114,13 +119,20 @@ export class ViewportSystem extends System<Entity> {
   highlightedHelper!: ObjectHelperType;
   settings: IViewportSettings = { ...defaultViewportSetting };
   constructor(settings?: IViewportParams) {
-    const componentsTypes = ["*"]; //needs all entities
+    const componentsTypes = ["*"];
     super(componentsTypes);
-    this.settings = { ...this.settings, ...defaultViewportSetting, ...settings };
+    this.settings = {
+      ...this.settings,
+      ...defaultViewportSetting,
+      ...settings,
+    };
     this.scene = new THREE.Scene();
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
+    this.mixer = new THREE.AnimationMixer(this.scene);
     this.sceneHelper = new THREE.Scene();
+    this.useRenderOnDemand = this.settings.useRenderOnDemand;
+    this.shouldRender = !this.useRenderOnDemand;
 
     if (this.settings.useShadow) {
       this.renderer.shadowMap.enabled = true;
@@ -164,14 +176,22 @@ export class ViewportSystem extends System<Entity> {
     super.init();
     this.inited = true;
   }
-  update(): void {
-    this.render();
+  requestRender() {
+    this.shouldRender = true;
+  }
+  update(delta: number): void {
+    if (!this.useRenderOnDemand) {
+      this.requestRender();
+    }
+    if (this.shouldRender) {
+      this.render(delta);
+    }
   }
   destroy() {
     // destroy viewport elements
   }
   addEntityToScene(entity: Entity) {
-    if (!entity.object3d.userData.entityId) {
+    if (!entity.object3d.entityId) {
       this.scene.add(entity.object3d);
       entity.object3d.entityId = entity.id;
       entity.object3d.userData.entityId = entity.id;
@@ -190,9 +210,13 @@ export class ViewportSystem extends System<Entity> {
       this.controls.transform.detach();
     }
     this.scene.remove(entity.object3d);
+    // cleanup animation if any
+    if (entity.object3d?.animations.length > 0) {
+      this.mixer.uncacheRoot(entity.object3d);
+    }
     entity.isOnScene = false;
   }
-  render() {
+  render(delta: number) {
     if (this.highlightedHelper) {
       this.highlightedHelper.update();
     }
@@ -201,6 +225,10 @@ export class ViewportSystem extends System<Entity> {
     this.renderer.autoClear = false;
     this.renderer.render(this.scene, this.camera);
     this.renderer.autoClear = true;
+    this.mixer.update(delta / 1000);
+    if (this.useRenderOnDemand) {
+      this.shouldRender = false;
+    }
   }
   resize(width?: number, height?: number) {
     const innerWidth = width || window.innerWidth;
@@ -236,7 +264,8 @@ export class ViewportSystem extends System<Entity> {
     const selected = this.intersect(event);
     if (selected) {
       this.broadcast(`entity-${event.type}`, {
-        entityId: selected.entityId, event
+        entityId: selected.entityId,
+        event,
       });
 
       // handle event by type
