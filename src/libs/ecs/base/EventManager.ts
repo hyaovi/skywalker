@@ -52,6 +52,7 @@ export const EVENT_NAMES = {
   entityAdding: "adding-entity",
   entityAdded: "added-entity",
   entityActivate: "activate-entity",
+  entityOnScene: "entity-on-scene",
   entityRemoving: "removing-entity",
   entityRemoved: "removed-entity",
   entityClicked: "entity-click",

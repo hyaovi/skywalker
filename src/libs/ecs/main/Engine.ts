@@ -5,6 +5,7 @@ import {
   ViewportSystem,
 } from "./ViewportSystem";
 import { EVENT_NAMES } from "../base/EventManager";
+import { MotionSystem } from "./MotionSystem";
 
 interface IEngineSettings {
   viewport?: IViewportParams;
@@ -14,18 +15,22 @@ const defaultEngineSettings: IEngineSettings = {
 };
 export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
   viewport: ViewportSystem;
+  motion:MotionSystem;
   constructor(settings?: IEngineSettings) {
     super(new EntityManager(), new SystemManager());
     this.viewport = new ViewportSystem(settings?.viewport);
-
+    this.motion = new MotionSystem();
     this.viewport.getObjects = this.entityManager.getObjects3d.bind(
       this.entityManager
     );
+
   }
   init(): void {
     if (this.inited) return;
     super.init();
     this.systemManager.addSystem(this.viewport);
+    this.motion = new MotionSystem();
+    this.systemManager.addSystem(this.motion)
     this.inited = true;
     this.broadcast(EVENT_NAMES.engineInited);
   }
@@ -47,6 +52,7 @@ export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
       mixer,
       controls: { transform, orbit },
     } = this.viewport;
+    const { activateEntity } = this.entityManager;
     return {
       scene,
       renderer,
@@ -54,6 +60,7 @@ export class Engine extends BaseEngine<Entity, EntityManager, SystemManager> {
       orbit,
       transform,
       mixer,
+      activateEntity,
       ...super.context,
     };
   }

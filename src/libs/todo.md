@@ -1,0 +1,12 @@
+### todo and ideas:
+- [ ] centralized-model-animation.
+    - [x] mixer
+    - [ ] play/stop animation, action should be created by ? : viewport or  separate Animationsystem?
+- [ ] scene environment, hdr, etc..
+- [ ] more 3d primitive objects, eg: text object, svg, sprite for billboard
+- [ ] post-processing
+- [ ] third person camera
+- [ ] motion system (for movable entity, WASD and etc...)
+- [ ] ui
+- [ ] physics
+- [ ] collision dectection

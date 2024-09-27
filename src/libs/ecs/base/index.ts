@@ -188,6 +188,8 @@ export class BaseEntityManager<
     this.getEntitiesByComponentType =
       this.getEntitiesByComponentType.bind(this);
     this.getEntityById = this.getEntityById.bind(this);
+    this.createEntity = this.createEntity.bind(this);
+    this.addEntity = this.addEntity.bind(this);
   }
   //   lifeclycles
   init(): void {

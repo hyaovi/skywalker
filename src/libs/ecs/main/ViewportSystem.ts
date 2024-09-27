@@ -203,6 +203,7 @@ export class ViewportSystem extends System<Entity> {
         this.sceneHelper.add(entity.helper);
         entity.object3d.userData.helper = entity.helper;
       }
+      this.broadcast(EVENT_NAMES.entityOnScene, {entityId:entity.id})
     }
   }
   removeEntityFromScene(entity: Entity) {
