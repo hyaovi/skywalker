@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { Base } from "../base";
 import { GLTF } from "three/examples/jsm/Addons.js";
+import { Base } from "../base";
 
 export class Loader extends Base {
   manager: THREE.LoadingManager;

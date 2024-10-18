@@ -1,10 +1,9 @@
 import * as THREE from "three";
-import { Behavior } from "./libs/ecs/main/index.ts";
-import { Engine } from "./libs/ecs/main/Engine.ts";
+import { Engine } from "./libs/ecs";
 
-import { _setupWorld } from "./libs/ecs/utils.ts";
-import { Loader } from "./libs/ecs/main/loaders.ts";
-import { MotionComponent } from "./libs/ecs/main/MotionSystem.ts";
+import { Loader } from "./libs/ecs/loaders";
+import { MotionComponent } from "./libs/ecs/components";
+import { _setupWorld } from "./libs/ecs/utils";
 
 const modelUrl = `https://threejs.org/examples/models/gltf/Soldier.glb`;
 // const modelUrl = `https://threejs.org/examples/models/gltf/SheenChair.glb`;
@@ -69,7 +68,7 @@ Array(10)
     //   entity.object3d.rotation.x += angularSpeedX;
     //   entity.object3d.rotation.y += angularSpeedY;
     // });
-    entity.on("click", function (data) {
+    entity.on("click", function (data:any) {
       console.log("@@ clicked", data);
     });
 

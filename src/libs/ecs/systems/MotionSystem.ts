@@ -1,15 +1,11 @@
-import { Entity } from ".";
-import { BaseComponent, System } from "../base";
+import { Entity } from "..";
 import { EVENT_NAMES } from "../base/EventManager";
+import { MotionComponent } from "../components";
+import { System } from "./System";
 
-export class MotionComponent extends BaseComponent {
-  constructor() {
-    super();
-  }
-}
 
 export class MotionSystem extends System<Entity> {
-    // the goal here is to make movable object , eg : move entity with 'WASD' or arrow keys
+  // the goal here is to make movable object , eg : move entity with 'WASD' or arrow keys
   constructor() {
     super([MotionComponent.name]);
   }

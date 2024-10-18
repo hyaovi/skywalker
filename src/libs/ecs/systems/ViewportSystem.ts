@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls, TransformControls } from "three/examples/jsm/Addons.js";
 
-import { System } from "../base";
-import { Entity } from ".";
 import { EVENT_NAMES } from "../base/EventManager";
 import { Object3DType, ObjectHelperType } from "../sharedTypes";
-import { makeHelper } from "./ObjectFactory";
+import { Entity } from "../entities/Entity";
+import { makeHelper } from "../utils/ObjectFactory";
+import { System } from "./System";
+
+
 
 export interface IViewportParams {
   clearColor?: number | THREE.Color;
@@ -98,7 +100,7 @@ class Controls {
   }
 }
 
-export class ViewportSystem extends System<Entity> {
+export class ViewportSystem extends System {
   scene: THREE.Scene;
   sceneHelper: THREE.Scene;
   renderer: THREE.WebGLRenderer;
@@ -208,7 +210,7 @@ export class ViewportSystem extends System<Entity> {
   }
   removeEntityFromScene(entity: Entity) {
     if (this.controls.transform?.object?.uuid == entity.object3d.uuid) {
-      this.controls.transform.detach();
+      this?.controls?.transform?.detach();
     }
     this.scene.remove(entity.object3d);
     // cleanup animation if any

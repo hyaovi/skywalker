@@ -43,7 +43,6 @@ export class EventManager {
     return this._events;
   }
 }
-export const eventManager = new EventManager();
 
 export const EVENT_NAMES = {
   componentAddedToEntity: "new-component-added",
@@ -72,3 +71,5 @@ export const EVENT_NAMES = {
 
   click: "click",
 };
+
+export const globalEventManager = new EventManager();
