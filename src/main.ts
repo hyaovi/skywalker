@@ -1,9 +1,9 @@
 import * as THREE from "three";
-import { Engine } from "./libs/ecs";
+import { Engine } from "./ecs";
 
-import { Loader } from "./libs/ecs/loaders";
-import { MotionComponent } from "./libs/ecs/components";
-import { _setupWorld } from "./libs/ecs/utils";
+import { Loader } from "./ecs/loaders";
+import { MotionComponent } from "./ecs/components";
+import { _setupWorld } from "./ecs/utils";
 
 const modelUrl = `https://threejs.org/examples/models/gltf/Soldier.glb`;
 // const modelUrl = `https://threejs.org/examples/models/gltf/SheenChair.glb`;

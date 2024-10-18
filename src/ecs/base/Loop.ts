@@ -1,6 +1,6 @@
 import { LooperCallbackType } from "../sharedTypes";
 
-export class Looper {
+export class Loop {
     delta: number = 0;
     now: number = performance.now();
     time: number = 0;
@@ -15,11 +15,11 @@ export class Looper {
   
       this.loop = this.loop.bind(this);
     }
-    startLoop(arrowCallback: LooperCallbackType) {
+    start(arrowCallback: LooperCallbackType) {
       this.loopCallback = arrowCallback;
       this.rfId = requestAnimationFrame(this.loop);
     }
-    loop() {
+    private loop() {
       const now = performance.now();
       this.delta = now - this.now;
       this.loopCallback?.(this.delta);
@@ -27,7 +27,7 @@ export class Looper {
       this.now = now;
       this.rfId = requestAnimationFrame(this.loop);
     }
-    stopLoop() {
+    stop() {
       if (this.rfId) {
         cancelAnimationFrame(this.rfId);
         this.rfId = undefined;

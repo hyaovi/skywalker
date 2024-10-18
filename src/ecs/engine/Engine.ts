@@ -4,7 +4,7 @@ import {
   ViewportSystem,
 } from "../systems";
 import { EVENT_NAMES, globalEventManager } from "../base/EventManager";
-import { Base, Looper } from "../base";
+import { Base, Loop } from "../base";
 import { ILifecycles } from "../sharedTypes";
 import { EntityManager, SystemManager } from "../managers";
 
@@ -18,7 +18,7 @@ export class Engine extends Base implements ILifecycles {
   viewport: ViewportSystem;
   systemManager: SystemManager;
   entityManager: EntityManager;
-  looper: Looper = new Looper();
+  loop: Loop = new Loop();
   readonly settings: IEngineSettings;
   constructor(settings?: IEngineSettings) {
     super();
@@ -52,7 +52,7 @@ export class Engine extends Base implements ILifecycles {
     if (this.started) return;
     this.entityManager.start();
     this.systemManager.start();
-    this.looper.startLoop((delta: number) => this.update(delta));
+    this.loop.start((delta: number) => this.update(delta));
 
     this.started = true;
     this.broadcast(EVENT_NAMES.engineStarted);
@@ -63,7 +63,7 @@ export class Engine extends Base implements ILifecycles {
     this.broadcast(EVENT_NAMES.engineUpdate, delta);
   }
   destroy(): void {
-    this.looper.stopLoop();
+    this.loop.stop();
   }
   run():void{
     this.init();
