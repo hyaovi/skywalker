@@ -7,22 +7,20 @@ import { Entity } from "../entities/Entity";
 import { makeHelper } from "../utils/ObjectFactory";
 import { System } from "./System";
 
-
-
 export interface IViewportParams {
   clearColor?: number | THREE.Color;
   useShadow?: boolean;
   useHelper?: boolean;
   useTransformControls?: boolean;
   size?: number;
-  useRenderOnDemand?:boolean;
+  useRenderOnDemand?: boolean;
 }
 interface IViewportSettings extends IViewportParams {
   clearColor: number | THREE.Color;
   useShadow: boolean;
   useHelper: boolean;
   useTransformControls: boolean;
-  useRenderOnDemand:boolean;
+  useRenderOnDemand: boolean;
   size: number;
 }
 export const defaultViewportSetting: IViewportSettings = {
@@ -31,7 +29,7 @@ export const defaultViewportSetting: IViewportSettings = {
   useHelper: true,
   useTransformControls: true,
   size: 150,
-  useRenderOnDemand:false
+  useRenderOnDemand: false,
 };
 
 export const pointerEvents = [
@@ -175,6 +173,16 @@ export class ViewportSystem extends System {
         this.createThrottledPointerEvent()
       );
     });
+    // render on demand for controls
+    if (this.useRenderOnDemand) {
+      this.controls?.orbit?.addEventListener("change", () => {
+        this.requestRender();
+      });
+      this.controls?.transform?.addEventListener("change", () => {
+        this.requestRender();
+      });
+    }
+    this.requestRender();
     super.init();
     this.inited = true;
   }
@@ -205,7 +213,7 @@ export class ViewportSystem extends System {
         this.sceneHelper.add(entity.helper);
         entity.object3d.userData.helper = entity.helper;
       }
-      this.broadcast(EVENT_NAMES.entityOnScene, {entityId:entity.id})
+      this.broadcast(EVENT_NAMES.entityOnScene, { entityId: entity.id });
     }
   }
   removeEntityFromScene(entity: Entity) {
@@ -240,6 +248,8 @@ export class ViewportSystem extends System {
     this.camera.aspect = innerWidth / innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(innerWidth, innerHeight);
+
+    this.requestRender();
   }
   intersect(event: PointerEvent | MouseEvent) {
     this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;

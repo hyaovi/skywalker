@@ -13,8 +13,9 @@ const loader = new Loader();
 const engine = new Engine({
   viewport: {
     useShadow: false,
-    useTransformControls: false,
+    useTransformControls: !false,
     useHelper: false,
+    useRenderOnDemand: !true,
   },
 });
 
@@ -29,15 +30,18 @@ const viewportSystem = engine.viewport;
 
 document.querySelector("#app")?.appendChild(engine.viewport.domElement);
 
-const data = await loader.load(modelUrl);
+const data = await loader.loadGLTF(modelUrl);
 console.log("data", data);
 data.scene.traverse((object) => {
   if (object instanceof THREE.Mesh) object.castShadow = true;
 });
 const entity = engine.entityManager.createEntity(data.scene);
+// const entity = engine.entityManager.createEntity();
+// const data = await entity.loadModel(modelUrl);
+
 const angularSpeedX = 0.01 * Math.random();
 const angularSpeedY = 0.02 * Math.random();
-entity.addComponent(new MotionComponent())
+entity.addComponent(new MotionComponent());
 // engine.subscribe("engine-update", () => {
 //   entity.object3d.rotation.x += angularSpeedX;
 //   entity.object3d.rotation.y += angularSpeedY;
@@ -62,14 +66,17 @@ Array(10)
     entity.object3d.position.y = 0.5;
     entity.object3d.castShadow = engine.viewport.settings.useShadow;
     entity.object3d.receiveShadow = entity.object3d.castShadow;
-    // const angularSpeedX = 0.01 * Math.random();
-    // const angularSpeedY = 0.02 * Math.random();
-    // engine.subscribe("engine-update", () => {
-    //   entity.object3d.rotation.x += angularSpeedX;
-    //   entity.object3d.rotation.y += angularSpeedY;
-    // });
-    entity.on("click", function (data:any) {
+    const angularSpeedX = 0.01 * Math.random();
+    const angularSpeedY = 0.02 * Math.random();
+    engine.subscribe("engine-update", () => {
+      entity.object3d.rotation.x += angularSpeedX;
+      entity.object3d.rotation.y += angularSpeedY;
+    });
+    entity.on("click", function (data: any) {
       console.log("@@ clicked", data);
+    });
+    entity.on("pointermove", function (data: any) {
+      console.log("@@ moveover", data);
     });
 
     engine.entityManager.activateEntity(entity);

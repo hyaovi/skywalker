@@ -2,10 +2,9 @@ import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/Addons.js";
 import { Base } from "../base";
 
-export class Loader extends Base {
+export class Loader {
   manager: THREE.LoadingManager;
   constructor() {
-    super();
     const onLoad = () => console.log("@@ starting loading");
     const onError = (url: string) =>
       console.log("@@ something went wrong", url);
@@ -34,16 +33,22 @@ export class Loader extends Base {
 
     return loader;
   }
-  async load(url: string) {
+  async loadGLTF(url: string) {
     const loader = await this.createGLTFLoader();
     return new Promise<GLTF>((resolve, reject) => {
-      loader.load(url, (data) => {
-        loader?.dracoLoader?.dispose();
-        loader?.ktx2Loader?.dispose();
-        resolve(data);
-      }, undefined, (error:unknown)=>{
-        reject(error)
-      });
+      loader.load(
+        url,
+        (data) => {
+          loader?.dracoLoader?.dispose();
+          loader?.ktx2Loader?.dispose();
+          resolve(data);
+        },
+        undefined,
+        (error: unknown) => {
+          reject(error);
+        }
+      );
     });
   }
+  init() {}
 }
