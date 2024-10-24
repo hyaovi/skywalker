@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { GLTF } from "three/examples/jsm/Addons.js";
-import { Base } from "../base";
 
 export class Loader {
   manager: THREE.LoadingManager;
@@ -11,6 +10,8 @@ export class Loader {
     const onProgress = (url: string, loaded: number, total: number) =>
       console.log("@@ progress", url, loaded, total);
     this.manager = new THREE.LoadingManager(onLoad, onProgress, onError);
+
+    this.loadGLTF = this.loadGLTF.bind(this);
   }
   async createGLTFLoader() {
     const { GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js");
@@ -52,3 +53,5 @@ export class Loader {
   }
   init() {}
 }
+
+export const globalLoader = new Loader();

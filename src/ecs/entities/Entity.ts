@@ -1,10 +1,9 @@
 import { Object3D } from "three";
 
-import { EventManager, EVENT_NAMES, globalEventManager} from "../base/EventManager";
+import { EventManager, EVENT_NAMES, globalEventManager } from "../base/EventManager";
 import { ILifecycles, Object3DType, ObjectHelperType } from "../sharedTypes";
-import { createPrimitiveMesh } from "../utils/ObjectFactory";
 import { loopThroughMapValues } from "../utils";
-import { BaseComponent , Behavior} from "../components";
+import { BaseComponent, Behavior } from "../components";
 
 export class BaseEntity extends EventManager implements ILifecycles {
   inited: boolean;
@@ -13,7 +12,7 @@ export class BaseEntity extends EventManager implements ILifecycles {
   isActive: boolean;
   isInteractive: boolean;
   isOnScene: boolean;
-  object3d: Object3DType;
+  sceneObject: Object3DType;
   helper!: ObjectHelperType;
 
   protected components: Map<string, BaseComponent>;
@@ -26,7 +25,7 @@ export class BaseEntity extends EventManager implements ILifecycles {
     this.isOnScene = false;
 
     this.components = new Map();
-    this.object3d = object3d || createPrimitiveMesh({ type: "box" });
+    this.sceneObject = object3d || new Object3D();
   }
   // lifecycles methods
   init() {
@@ -70,7 +69,7 @@ export class BaseEntity extends EventManager implements ILifecycles {
   }
   // 3d object methods
   setObject3D(object: Object3D) {
-    this.object3d = object;
+    this.sceneObject = object;
   }
   addComponent(component: BaseComponent) {
     const componentId = this.components.size.toString();

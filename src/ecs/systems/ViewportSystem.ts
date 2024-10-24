@@ -70,7 +70,7 @@ class Controls {
   select(entity: Entity) {
     this.deselect();
     if (this.settings.useTransform) {
-      this.transform?.attach(entity.object3d);
+      this.transform?.attach(entity.sceneObject);
     }
     this.highlight(entity);
   }
@@ -201,29 +201,29 @@ export class ViewportSystem extends System {
     // destroy viewport elements
   }
   addEntityToScene(entity: Entity) {
-    if (!entity.object3d.entityId) {
-      this.scene.add(entity.object3d);
-      entity.object3d.entityId = entity.id;
-      entity.object3d.userData.entityId = entity.id;
+    if (!entity.sceneObject.entityId) {
+      this.scene.add(entity.sceneObject);
+      entity.sceneObject.entityId = entity.id;
+      entity.sceneObject.userData.entityId = entity.id;
       entity.isOnScene = true;
 
       // add helper on editor mode
       this.makeHelper(entity);
       if (this.settings.useHelper && entity.helper) {
         this.sceneHelper.add(entity.helper);
-        entity.object3d.userData.helper = entity.helper;
+        entity.sceneObject.userData.helper = entity.helper;
       }
       this.broadcast(EVENT_NAMES.entityOnScene, { entityId: entity.id });
     }
   }
   removeEntityFromScene(entity: Entity) {
-    if (this.controls.transform?.object?.uuid == entity.object3d.uuid) {
+    if (this.controls.transform?.object?.uuid == entity.sceneObject.uuid) {
       this?.controls?.transform?.detach();
     }
-    this.scene.remove(entity.object3d);
+    this.scene.remove(entity.sceneObject);
     // cleanup animation if any
-    if (entity.object3d?.animations.length > 0) {
-      this.mixer.uncacheRoot(entity.object3d);
+    if (entity.sceneObject?.animations.length > 0) {
+      this.mixer.uncacheRoot(entity.sceneObject);
     }
     entity.isOnScene = false;
   }
@@ -338,7 +338,7 @@ export class ViewportSystem extends System {
       entity.helper.removeFromParent();
       entity.helper.dispose();
     }
-    const helper = makeHelper(entity.object3d);
+    const helper = makeHelper(entity.sceneObject);
     if (helper) {
       helper.visible = false;
     }

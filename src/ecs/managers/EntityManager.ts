@@ -123,8 +123,8 @@ export class EntityManager extends BaseEntityManager {
     }
     getObjects3d() {
       return this.filterEntities((entity) => {
-        return entity.isInteractive && entity.object3d !== undefined;
-      }).map((entity) => entity.object3d);
+        return entity.isInteractive && entity.sceneObject !== undefined;
+      }).map((entity) => entity.sceneObject);
     }
     protected removeEntity(_entity: Entity): void {
       const entity = this.getEntityById(_entity.id);

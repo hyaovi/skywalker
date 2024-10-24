@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
-type PrimitiveType = "box" | "sphere" | "cylinder" | "plane";
+export type PrimitiveType = "box" | "sphere" | "cylinder" | "plane";
 type LightType = "ambient" | "directional" | "hemisphere" | "point" | "spot";
+export type ColorType = number;
 
 interface PrimitiveParams {
   type: PrimitiveType;
@@ -36,6 +37,9 @@ export function createPrimitiveMesh(params: PrimitiveParams) {
       break;
     case "cylinder":
       geometry = new THREE.CylinderGeometry();
+      break;
+    case "plane":
+      geometry = new THREE.PlaneGeometry();
       break;
     default:
       console.error(`Unsupported primitive type: ${params.type}`);
@@ -121,7 +125,6 @@ export function makeHelper(
 export function createCustomGrid(size = 60) {
   const GRID_COLORS_LIGHT = [0x999999, 0x777777];
   const GRID_COLORS_DARK = [0x555555, 0x888888];
-
 
   const grid = new THREE.GridHelper(size, size);
   grid.material.color.setHex(GRID_COLORS_LIGHT[0]);
