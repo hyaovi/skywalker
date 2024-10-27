@@ -4,9 +4,8 @@ import { OrbitControls, TransformControls } from "three/examples/jsm/Addons.js";
 import { EVENT_NAMES } from "../base/EventManager";
 import { Object3DType, ObjectHelperType } from "../sharedTypes";
 import { Entity } from "../entities/Entity";
-import { makeHelper } from "../utils/ObjectFactory";
 import { System } from "./System";
-import { AnimationComponent, InteractableComponent, MeshComponent } from "../components";
+import {  MeshComponent } from "../components";
 
 export interface IViewportParams {
   clearColor?: number | THREE.Color;
@@ -100,15 +99,17 @@ class Controls {
 }
 
 export class ViewportSystem extends System {
+  useRenderOnDemand: boolean = false;
+  shouldRender: boolean = true;
+  inited: boolean = false;
+
   scene: THREE.Scene;
   sceneHelper: THREE.Scene;
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   mixer: THREE.AnimationMixer;
   controls: Controls;
-  useRenderOnDemand: boolean;
-  shouldRender: boolean;
-  inited: boolean = false;
+
   raycaster: THREE.Raycaster;
   pointer: THREE.Vector2;
   getObjects!: () => Object3DType[];
@@ -122,22 +123,13 @@ export class ViewportSystem extends System {
     const componentsTypes = [MeshComponent.name];
     super(componentsTypes);
     this.needsUpdateCalls = true;
-    this.settings = {
-      ...this.settings,
-      ...defaultViewportSetting,
-    };
+
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.camera = new THREE.PerspectiveCamera(50, 1, 0.01, 1000);
     this.mixer = new THREE.AnimationMixer(this.scene);
     this.sceneHelper = new THREE.Scene();
-    this.useRenderOnDemand = this.settings.useRenderOnDemand;
-    this.shouldRender = !this.useRenderOnDemand;
 
-    if (this.settings.useShadow) {
-      this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    }
 
     this.controls = new Controls(this.camera, this.domElement, {
       useTransform: this.settings.useTransformControls,
@@ -145,10 +137,25 @@ export class ViewportSystem extends System {
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
 
-    this.pointerEventCallback = this.pointerEventCallback.bind(this);
   }
   get domElement() {
     return this.renderer.domElement;
+  }
+  setSettings(settings: IViewportParams) {
+    this.settings = {
+      ...this.settings,
+      ...defaultViewportSetting,
+      ...settings,
+    };
+    this.resetSystem()
+  }
+  resetSystem() {
+    if (this.settings.useShadow) {
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
+    this.useRenderOnDemand = this.settings.useRenderOnDemand;
+    this.shouldRender = !this.useRenderOnDemand;
   }
   init() {
     if (this.inited) return;
@@ -167,13 +174,6 @@ export class ViewportSystem extends System {
       if (entity) this.addEntityToScene(entity);
     });
 
-    // pointerEvents.forEach((pointerEvent) => {
-    //   this.domElement.addEventListener(
-    //     pointerEvent,
-    //     this.createThrottledPointerEvent()
-    //   );
-    // });
-    // render on demand for controls
     if (this.useRenderOnDemand) {
       this.controls?.orbit?.addEventListener("change", () => {
         this.requestRender();
@@ -202,34 +202,13 @@ export class ViewportSystem extends System {
   }
 
   addEntityToScene(entity: Entity) {
-    if (!entity.sceneObject.entityId) {
+    if (!entity.isOnScene && !entity.sceneObject.entityId) {
       this.scene.add(entity.sceneObject);
       entity.sceneObject.entityId = entity.id;
-      // mark object 
-      entity.sceneObject.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.userData.entityId = entity.id
-        }
-      })
+
       entity.sceneObject.userData.entityId = entity.id;
       entity.isOnScene = true;
 
-      // animation if compoinent animation
-      const animComponent = entity.getComponent(AnimationComponent.name) as AnimationComponent | undefined;
-      if (animComponent && !animComponent.isSet) {
-        animComponent.action = this.mixer.clipAction(THREE.AnimationClip.findByName(entity.sceneObject.animations, animComponent.name));
-        if (animComponent.action) {
-          animComponent.action.play();
-          animComponent.isSet = true
-        }
-      }
-
-      // add helper on editor mode
-      this.makeHelper(entity);
-      if (this.settings.useHelper && entity.helper) {
-        this.sceneHelper.add(entity.helper);
-        entity.sceneObject.userData.helper = entity.helper;
-      }
       this.broadcast(EVENT_NAMES.entityOnScene, { entityId: entity.id });
     }
   }
@@ -353,17 +332,5 @@ export class ViewportSystem extends System {
       }
     };
   }
-  makeHelper(entity: Entity) {
-    if (!entity.hasComponentType(InteractableComponent.name)) return;
-    if (entity.helper && entity.helper.parent) {
-      entity.helper.removeFromParent();
-      entity.helper.dispose();
-    }
-    const helper = makeHelper(entity.sceneObject);
-    if (helper) {
-      helper.visible = false;
-    }
-    entity.helper = helper;
-    return entity.helper;
-  }
+
 }

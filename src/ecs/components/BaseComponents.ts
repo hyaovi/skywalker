@@ -1,5 +1,5 @@
 import { AnimationAction, } from "three";
-import { Base, globalEventManager } from "../base";
+import { Base } from "../base";
 import { IPrimitiveParams } from "../sharedTypes";
 import { ILightParams } from "../utils/ObjectFactory";
 

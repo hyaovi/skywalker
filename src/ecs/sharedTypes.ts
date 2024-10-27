@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { PrimitiveType, ColorType } from "./utils/ObjectFactory";
+import { PrimitiveType, ColorType, MaterialType } from "./utils/ObjectFactory";
 
 type _Object3DType = THREE.Mesh | THREE.Light | THREE.Object3D;
 export type Object3DType = _Object3DType & {
@@ -20,4 +20,5 @@ export interface ILifecycles {
 export interface IPrimitiveParams {
   type: PrimitiveType;
   color: ColorType;
+  material?:MaterialType;
 }

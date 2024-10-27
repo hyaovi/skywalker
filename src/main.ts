@@ -1,10 +1,8 @@
 import * as THREE from "three";
-import { AnimationComponent, Engine, InteractableComponent } from "./ecs";
+import {  Engine, InteractableComponent } from "./ecs";
 
-import { globalLoader } from "./ecs/loaders";
 import { setupStats } from "./ecs/utils/utils";
 
-const modelUrl = `https://threejs.org/examples/models/gltf/Soldier.glb`;
 
 const engine = new Engine({
   viewport: {
@@ -28,7 +26,7 @@ engine.subscribeOnce("engine-started", async () => {
   Array(10)
     .fill(null)
     .map(async (_, index) => {
-      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'cylinder', color: 0xffccff * Math.random() })
+      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'cylinder', color: 0xffccff * Math.random(), material:'standard' })
       engine.manager.activateEntity(entity)
       entity.sceneObject.position.x = (index + 10) * Math.random() - 10;
       entity.sceneObject.position.z = (index + 10) * Math.random() - 10;
@@ -45,9 +43,6 @@ engine.subscribeOnce("engine-started", async () => {
         entity.sceneObject.rotation.x += angularSpeedX;
         entity.sceneObject.rotation.y += angularSpeedY;
       });
-      entity.on("click", (data: any) => {
-        console.log("@@ clicked", data);
-      });
       return entity;
     });
   document.querySelector("#app")?.appendChild(engine.viewport.domElement);
@@ -57,15 +52,6 @@ engine.subscribeOnce("engine-started", async () => {
     engine.viewport.resize();
   });
 
-  const model = await globalLoader.loadGLTF(modelUrl);
-  model.scene.animations = model.animations;
-  const modelEntity = engine.manager.createEntity(model.scene);
-  modelEntity.addComponent(new InteractableComponent())
-  modelEntity.addComponent(new AnimationComponent({ name: model.animations[3].name, loop: true, clampWhenFinished: true, autoplay: true }))
-  engine.manager.activateEntity(modelEntity);
-
-  const action = engine.viewport.mixer.clipAction(modelEntity.sceneObject.animations[3], modelEntity.sceneObject);
-  // action.play();
 
 
 });

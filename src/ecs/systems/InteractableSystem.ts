@@ -22,7 +22,8 @@ export class InteractableSystem extends System {
         this.renderer = renderer
     }
     private initializeEventListeners() {
-        this.subscribe(EVENT_NAMES.entityOnScene, this.invalideInteractableMeshesCache);
+        this.subscribe(EVENT_NAMES.componentAddedToEntity, this.markEntity);
+        this.subscribe(EVENT_NAMES.entityOnScene, this.markEntity);
         this.subscribe(EVENT_NAMES.entityRemoved, this.invalideInteractableMeshesCache);
         // meshes list 
         window.addEventListener('pointerdown', this.handlePointerDown);
@@ -40,7 +41,7 @@ export class InteractableSystem extends System {
     }
     handlePointerDown = (event: EventType) => {
         this.updateRaycaster(event);
-        const entity = this.intersectEntity();
+        const entity = this.intersectByEntities();
         if (entity) {
             this.broadcast(`entity-click`, {
                 entityId: entity.id,
@@ -69,7 +70,7 @@ export class InteractableSystem extends System {
             return results[0].entity
         }
     }
-    intersectEntity() {
+    intersectEntity(): Entity | undefined {
         const objects = this.query.execute().map(entity => entity.sceneObject);
         const meshes: THREE.Mesh[] = [];
         objects.forEach(object => {
@@ -102,10 +103,22 @@ export class InteractableSystem extends System {
     invalideInteractableMeshesCache = () => {
         this.interactableMeshes = null;
     }
+    markEntity = ({ entityId }: { entityId: Entity['id'] }) => {
+        const entity = this.getEntityById(entityId);
+        if (entity && entity.isOnScene && entity.hasComponentType(InteractableComponent.name)) {
+            entity.sceneObject.traverse(child => {
+                if (child instanceof THREE.Mesh) {
+                    child.userData.entityId = entity.id
+                }
+            })
+            this.invalideInteractableMeshesCache()
+        }
+    }
 
     destroy(): void {
-        this.subscribe(EVENT_NAMES.entityOnScene, this.invalideInteractableMeshesCache);
-        this.subscribe(EVENT_NAMES.entityRemoved, this.invalideInteractableMeshesCache);
+        this.unsubscribe(EVENT_NAMES.entityOnScene, this.invalideInteractableMeshesCache);
+        this.unsubscribe(EVENT_NAMES.entityRemoved, this.invalideInteractableMeshesCache);
+        this.unsubscribe(EVENT_NAMES.componentAddedToEntity, this.markEntity);
         // meshes list 
         window.addEventListener('pointerdown', this.handlePointerDown);
         this.invalideInteractableMeshesCache();

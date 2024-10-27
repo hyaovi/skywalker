@@ -28,7 +28,7 @@ export class Engine extends Base implements ILifecycles {
     if (this.inited) return;
     this.manager.init()
 
-    this.viewport = this.manager.addSystem(new ViewportSystem(this.settings.viewport));
+    this.viewport = this.manager.addSystem(new ViewportSystem());
     const { scene, camera, renderer } = this.viewport
     this.manager.addSystem(new InteractableSystem({ scene, renderer, camera }));
 

@@ -1,11 +1,14 @@
 import * as THREE from "three";
 
 export type PrimitiveType = "box" | "sphere" | "cylinder" | "plane";
+export type MaterialType = "normal" | "standard" | "basic";
 type LightType = "ambient" | "directional" | "hemisphere" | "point" | "spot";
-export type ColorType = number;
+export type ColorType = number| string;
 
 export interface IPrimitiveParams {
   type: PrimitiveType;
+  color?: ColorType;
+  material?: MaterialType
   width?: number;
   height?: number;
   depth?: number;
@@ -16,16 +19,28 @@ export interface IPrimitiveParams {
   heightSegments?: number;
   depthSegments?: number;
   openEnded?: boolean;
-  color?: number | string;
 }
 export interface ILightParams {
   type: LightType;
 }
+function makeMaterial(materialType: MaterialType = 'standard', colorType?: ColorType) {
+  switch (materialType) {
+    case 'normal':
+      return new THREE.MeshNormalMaterial()
 
+    case 'standard': {
+      const color = new THREE.Color(colorType || 0xcccccc * Math.random());
+      return new THREE.MeshStandardMaterial({ color })
+    }
+    default:
+    case 'basic': {
+      const color = new THREE.Color(colorType || 0xcccccc * Math.random());
+      return new THREE.MeshBasicMaterial({ color })
+    }
+  }
+}
 export function createPrimitiveMesh(params: IPrimitiveParams) {
-  const material = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(params.color || 0xcccccc * Math.random()),
-  });
+
   let geometry = new THREE.BufferGeometry();
   switch (params.type) {
     case "box":
@@ -44,6 +59,7 @@ export function createPrimitiveMesh(params: IPrimitiveParams) {
     default:
       console.error(`Unsupported primitive type: ${params.type}`);
   }
+  const material = makeMaterial(params.material, params.color)
   const mesh = new THREE.Mesh(geometry, material);
   return mesh;
 }
