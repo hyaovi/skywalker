@@ -1,1 +1,1 @@
-export { Entity, BaseEntity } from "./Entity";
+export {BaseEntity, Entity } from "./Entity";

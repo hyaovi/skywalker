@@ -1,12 +1,13 @@
 import {
   defaultViewportSetting,
+  InteractableSystem,
   IViewportParams,
   ViewportSystem,
 } from "../systems";
 import { EVENT_NAMES, globalEventManager } from "../base/EventManager";
 import { Base, Loop } from "../base";
 import { ILifecycles } from "../sharedTypes";
-import { EntityManager, SystemManager } from "../managers";
+import { manager } from "../managers";
 
 interface IEngineSettings {
   viewport?: IViewportParams;
@@ -15,57 +16,43 @@ const defaultEngineSettings: IEngineSettings = {
   viewport: defaultViewportSetting,
 };
 export class Engine extends Base implements ILifecycles {
-  viewport: ViewportSystem;
-  systemManager: SystemManager;
-  entityManager: EntityManager;
+  manager = manager
+  viewport!: ViewportSystem;
   loop: Loop = new Loop();
   readonly settings: IEngineSettings;
   constructor(settings?: IEngineSettings) {
     super();
-    this.systemManager = new SystemManager();
-    this.entityManager = new EntityManager();
     this.settings = settings || defaultEngineSettings;
-
-    this.viewport = new ViewportSystem(this.settings.viewport);
-    this.viewport.getObjects = this.entityManager.getObjects3d.bind(
-      this.entityManager
-    );
   }
   init(): void {
     if (this.inited) return;
-    this.systemManager.getEntityById = (entityId: string) =>
-      this.entityManager.getEntityById(entityId);
+    this.manager.init()
 
-    this.systemManager.getEntitiesByComponentType = (
-      componentTypes: string[]
-    ) => this.entityManager.getEntitiesByComponentType(componentTypes);
+    this.viewport = this.manager.addSystem(new ViewportSystem(this.settings.viewport));
+    const { scene, camera, renderer } = this.viewport
+    this.manager.addSystem(new InteractableSystem({ scene, renderer, camera }));
 
-    this.entityManager.init();
-    this.systemManager.init();
-
-    this.systemManager.addSystem(this.viewport);
+    (window as any ).ii = this.manager.getSystem(InteractableSystem);
 
     this.inited = true;
     this.broadcast(EVENT_NAMES.engineInited);
   }
   start(): void {
     if (this.started) return;
-    this.entityManager.start();
-    this.systemManager.start();
+    this.manager.start()
     this.loop.start((delta: number) => this.update(delta));
 
     this.started = true;
     this.broadcast(EVENT_NAMES.engineStarted);
   }
   update(delta: number): void {
-    this.entityManager.update(delta);
-    this.systemManager.update(delta);
+    this.manager.update(delta)
     this.broadcast(EVENT_NAMES.engineUpdate, delta);
   }
   destroy(): void {
     this.loop.stop();
   }
-  run():void{
+  run(): void {
     this.init();
     this.start();
   }
@@ -77,7 +64,7 @@ export class Engine extends Base implements ILifecycles {
       mixer,
       controls: { transform, orbit },
     } = this.viewport;
-    const { activateEntity, getEntityById, createEntity } = this.entityManager;
+    const { activateEntity, getEntityById, createEntity } = this.manager;
 
     return {
       scene,
@@ -91,7 +78,7 @@ export class Engine extends Base implements ILifecycles {
       createEntity,
     };
   }
-  get events(){
+  get events() {
     return globalEventManager.events
   }
 }

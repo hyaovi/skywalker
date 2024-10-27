@@ -4,7 +4,7 @@ export type PrimitiveType = "box" | "sphere" | "cylinder" | "plane";
 type LightType = "ambient" | "directional" | "hemisphere" | "point" | "spot";
 export type ColorType = number;
 
-interface PrimitiveParams {
+export interface IPrimitiveParams {
   type: PrimitiveType;
   width?: number;
   height?: number;
@@ -16,15 +16,15 @@ interface PrimitiveParams {
   heightSegments?: number;
   depthSegments?: number;
   openEnded?: boolean;
-  color?: number;
+  color?: number | string;
 }
-interface LightParams {
+export interface ILightParams {
   type: LightType;
 }
 
-export function createPrimitiveMesh(params: PrimitiveParams) {
+export function createPrimitiveMesh(params: IPrimitiveParams) {
   const material = new THREE.MeshStandardMaterial({
-    color: params.color || 0xcccccc * Math.random(),
+    color: new THREE.Color(params.color || 0xcccccc * Math.random()),
   });
   let geometry = new THREE.BufferGeometry();
   switch (params.type) {
@@ -48,7 +48,7 @@ export function createPrimitiveMesh(params: PrimitiveParams) {
   return mesh;
 }
 
-export function createLight(params: LightParams) {
+export function createLight(params: ILightParams) {
   const color = 0xffffff;
   const intensity = 0.5;
   let light;
@@ -145,4 +145,8 @@ export function makeGround(size: number = 1000) {
   ground.castShadow = true;
   ground.receiveShadow = true;
   return ground;
+}
+
+export function createObjectContainer() {
+  return new THREE.Mesh(new THREE.SphereGeometry(), new THREE.MeshBasicMaterial({ opacity: 0.4, transparent: true }))
 }

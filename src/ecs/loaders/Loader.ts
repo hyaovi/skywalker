@@ -13,7 +13,7 @@ export class Loader {
 
     this.loadGLTF = this.loadGLTF.bind(this);
   }
-  async createGLTFLoader() {
+  private async createGLTFLoader() {
     const { GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js");
     const { DRACOLoader } = await import("three/addons/loaders/DRACOLoader.js");
     const { KTX2Loader } = await import("three/addons/loaders/KTX2Loader.js");

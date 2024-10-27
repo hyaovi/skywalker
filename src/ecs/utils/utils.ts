@@ -27,13 +27,13 @@ export function _setupWorld(engine: Engine) {
     dirLight.shadow.radius = 0.2;
   }
 
-  const dirLightEntity = engine.entityManager.createEntity(dirLight);
+  const dirLightEntity = engine.manager.createEntity(dirLight);
 
-  engine.entityManager.activateEntity(dirLightEntity);
+  engine.manager.activateEntity(dirLightEntity);
   // ambient light
   const ambLight = new THREE.AmbientLight(0xffffff, 1);
-  const ambLightEntity = engine.entityManager.createEntity(ambLight);
-  engine.entityManager.activateEntity(ambLightEntity);
+  const ambLightEntity = engine.manager.createEntity(ambLight);
+  engine.manager.activateEntity(ambLightEntity);
 
   // shadowfloor
   if (engine.viewport.settings.useShadow) {
@@ -43,9 +43,8 @@ export function _setupWorld(engine: Engine) {
     plane.rotateX(-Math.PI / 2);
     plane.position.y = -3;
     plane.receiveShadow = true;
-    const floor = engine.entityManager.createEntity(plane);
-    floor.isInteractive = false;
-    engine.entityManager.activateEntity(floor);
+    const floor = engine.manager.createEntity(plane);
+    engine.manager.activateEntity(floor);
   }
   // setup stats
   const stats = createStats();
@@ -58,6 +57,15 @@ export function _setupWorld(engine: Engine) {
 function createStats() {
   const stats = new Stats();
   stats.showPanel(0);
+  return stats;
+}
+export function setupStats(engine: Engine) {
+  const stats = new Stats();
+  stats.showPanel(0);
+  engine.subscribe(EVENT_NAMES.engineUpdate, () => {
+    stats.update();
+  });
+  document.body.appendChild(stats.dom);
   return stats;
 }
 

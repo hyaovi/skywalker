@@ -6,6 +6,7 @@ import { Object3DType, ObjectHelperType } from "../sharedTypes";
 import { Entity } from "../entities/Entity";
 import { makeHelper } from "../utils/ObjectFactory";
 import { System } from "./System";
+import { AnimationComponent, InteractableComponent, MeshComponent } from "../components";
 
 export interface IViewportParams {
   clearColor?: number | THREE.Color;
@@ -46,8 +47,8 @@ class Controls {
   settings: {
     useTransform?: boolean;
   } = {
-    useTransform: true,
-  };
+      useTransform: true,
+    };
 
   constructor(
     camera: THREE.Camera,
@@ -92,7 +93,7 @@ class Controls {
       this.transform?.detach?.();
     }
   }
-  update(_delta: number): void {}
+  update(_delta: number): void { }
   render(delta: number) {
     this.orbit.update(delta);
   }
@@ -104,7 +105,6 @@ export class ViewportSystem extends System {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   mixer: THREE.AnimationMixer;
-  // controls
   controls: Controls;
   useRenderOnDemand: boolean;
   shouldRender: boolean;
@@ -118,13 +118,13 @@ export class ViewportSystem extends System {
   };
   highlightedHelper!: ObjectHelperType;
   settings: IViewportSettings = { ...defaultViewportSetting };
-  constructor(settings?: IViewportParams) {
-    const componentsTypes = ["*"];
+  constructor() {
+    const componentsTypes = [MeshComponent.name];
     super(componentsTypes);
+    this.needsUpdateCalls = true;
     this.settings = {
       ...this.settings,
       ...defaultViewportSetting,
-      ...settings,
     };
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -167,12 +167,12 @@ export class ViewportSystem extends System {
       if (entity) this.addEntityToScene(entity);
     });
 
-    pointerEvents.forEach((pointerEvent) => {
-      this.domElement.addEventListener(
-        pointerEvent,
-        this.createThrottledPointerEvent()
-      );
-    });
+    // pointerEvents.forEach((pointerEvent) => {
+    //   this.domElement.addEventListener(
+    //     pointerEvent,
+    //     this.createThrottledPointerEvent()
+    //   );
+    // });
     // render on demand for controls
     if (this.useRenderOnDemand) {
       this.controls?.orbit?.addEventListener("change", () => {
@@ -200,12 +200,29 @@ export class ViewportSystem extends System {
   destroy() {
     // destroy viewport elements
   }
+
   addEntityToScene(entity: Entity) {
     if (!entity.sceneObject.entityId) {
       this.scene.add(entity.sceneObject);
       entity.sceneObject.entityId = entity.id;
+      // mark object 
+      entity.sceneObject.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.userData.entityId = entity.id
+        }
+      })
       entity.sceneObject.userData.entityId = entity.id;
       entity.isOnScene = true;
+
+      // animation if compoinent animation
+      const animComponent = entity.getComponent(AnimationComponent.name) as AnimationComponent | undefined;
+      if (animComponent && !animComponent.isSet) {
+        animComponent.action = this.mixer.clipAction(THREE.AnimationClip.findByName(entity.sceneObject.animations, animComponent.name));
+        if (animComponent.action) {
+          animComponent.action.play();
+          animComponent.isSet = true
+        }
+      }
 
       // add helper on editor mode
       this.makeHelper(entity);
@@ -251,10 +268,14 @@ export class ViewportSystem extends System {
 
     this.requestRender();
   }
-  intersect(event: PointerEvent | MouseEvent) {
-    this.pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-    this.pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  updateRaycaster(event: PointerEvent | MouseEvent) {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    this.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     this.raycaster.setFromCamera(this.pointer, this.camera);
+  }
+  intersect(event: PointerEvent | MouseEvent) {
+    this.updateRaycaster(event);
     const objects = this.getObjects();
     const intersects = this.raycaster.intersectObjects(objects, true);
     if (intersects.length) {
@@ -333,7 +354,7 @@ export class ViewportSystem extends System {
     };
   }
   makeHelper(entity: Entity) {
-    if (!entity.isInteractive) return;
+    if (!entity.hasComponentType(InteractableComponent.name)) return;
     if (entity.helper && entity.helper.parent) {
       entity.helper.removeFromParent();
       entity.helper.dispose();

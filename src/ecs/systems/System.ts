@@ -1,24 +1,35 @@
 import { Base } from "../base";
-import { BaseComponent } from "../components";
-import { BaseEntity, Entity } from "../entities/Entity";
+import { Component } from "../components";
+import { Entity } from "../entities";
+import { manager } from "../managers";
 
-export class System<EntityType extends BaseEntity = Entity> extends Base {
-    id!: string;
-    componentTypes: BaseComponent["componentType"][];
-    entities!: EntityType[];
-    getEntities!: () => EntityType[];
-    getEntityById!: (entityId: EntityType["id"]) => EntityType | undefined;
-    readonly systemType: string;
-  
-    constructor(componentsTypes?: string[]) {
-      super();
-      this.componentTypes = componentsTypes || [];
-      this.systemType = this.constructor.name;
-    }
-    start() {
-      if (this.inited) return;
-      this.entities = this.getEntities();
-      super.init();
-      this.inited = true;
-    }
+type componentTypeType = Component['componentType']
+export class System extends Base {
+  id!: string;
+  entities!: Entity[];
+  getEntityById = manager.getEntityById.bind(manager);
+  needsUpdateCalls:boolean = false
+  readonly systemType: string;
+  query = manager.getQuery();
+
+  constructor(componentTypes: componentTypeType[]) {
+    super();
+    this.systemType = this.constructor.name;
+    this.componentTypes = componentTypes || [];
   }
+
+  start() {
+    if (this.inited) return;
+    this.entities = this.query.execute();
+    super.init();
+    this.inited = true;
+  }
+
+  get componentsTypes() {
+    return this.query.componentTypes
+  }
+  set componentTypes(componentTypes: componentTypeType[]) {
+    this.query.setFilter(componentTypes)
+  }
+
+}
