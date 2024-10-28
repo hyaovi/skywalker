@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import {  Engine, InteractableComponent } from "./ecs";
+import { Engine, InteractableComponent } from "./ecs";
 
 import { setupStats } from "./ecs/utils/utils";
 
@@ -26,22 +26,29 @@ engine.subscribeOnce("engine-started", async () => {
   Array(10)
     .fill(null)
     .map(async (_, index) => {
-      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'cylinder', color: 0xffccff * Math.random(), material:'standard' })
+      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'cylinder', color: 0xffccff * Math.random(), material: 'standard' })
       engine.manager.activateEntity(entity)
       entity.sceneObject.position.x = (index + 10) * Math.random() - 10;
       entity.sceneObject.position.z = (index + 10) * Math.random() - 10;
       entity.sceneObject.position.y = 0.5 * Math.random() * 10;
       entity.sceneObject.castShadow = engine.viewport.settings.useShadow;
       entity.sceneObject.receiveShadow = entity.sceneObject.castShadow;
+      let interactable: InteractableComponent | null = null;
       if (index % 2 == 0) {
-        entity.addComponent(new InteractableComponent());
+        interactable = new InteractableComponent()
+        entity.addComponent(interactable);
         entity.sceneObject.scale.multiplyScalar(1.5)
       }
       const angularSpeedX = 0.01 * Math.random();
       const angularSpeedY = 0.02 * Math.random();
       engine.subscribe("engine-update", () => {
-        entity.sceneObject.rotation.x += angularSpeedX;
-        entity.sceneObject.rotation.y += angularSpeedY;
+        if (interactable && interactable.isHovered) {
+          entity.sceneObject.rotation.x += angularSpeedX * 60;
+          entity.sceneObject.rotation.y += angularSpeedY * 60;
+        } else {
+          entity.sceneObject.rotation.x += angularSpeedX;
+          entity.sceneObject.rotation.y += angularSpeedY;
+        }
       });
       return entity;
     });

@@ -5,6 +5,8 @@ import { System } from "./System";
 import * as THREE from "three";
 
 type EventType = PointerEvent | MouseEvent
+
+// events list pointerover
 export class InteractableSystem extends System {
     raycaster = new THREE.Raycaster();
     pointer: THREE.Vector2;
@@ -12,6 +14,9 @@ export class InteractableSystem extends System {
     renderer: THREE.WebGLRenderer;
     camera: THREE.PerspectiveCamera;
     private interactableMeshes: THREE.Mesh[] | null = null;
+    hoveredEntity: Entity | null = null
+    pressedEntity: Entity | null = null
+    selectedEntity: Entity | null = null
 
     constructor({ scene, camera, renderer }: { scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer }) {
         super([InteractableComponent.name])
@@ -26,7 +31,14 @@ export class InteractableSystem extends System {
         this.subscribe(EVENT_NAMES.entityOnScene, this.markEntity);
         this.subscribe(EVENT_NAMES.entityRemoved, this.invalideInteractableMeshesCache);
         // meshes list 
+        // DOM EVENT
         window.addEventListener('pointerdown', this.handlePointerDown);
+        window.addEventListener('pointermove', this.handlePointerMove)
+        window.addEventListener('pointerup', this.handlePointerUp)
+
+        // window.addEventListener('mousedown', this.handlePointerDown);
+        // window.addEventListener('mousemove', this.handlePointerMove)
+        // window.addEventListener('mouseup', this.handlePointerUp)
     }
     init(): void {
         if (this.inited) return
@@ -39,17 +51,61 @@ export class InteractableSystem extends System {
         this.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
         this.raycaster.setFromCamera(this.pointer, this.camera);
     }
+    // DOM EVENTS HANDLERS
     handlePointerDown = (event: EventType) => {
-        this.updateRaycaster(event);
-        const entity = this.intersectByEntities();
-        if (entity) {
-            this.broadcast(`entity-click`, {
-                entityId: entity.id,
-                event,
-            });
-            entity.emit('click', event)
+        console.log('@@@ down on ', this.hoveredEntity?.id)
+        if (this.hoveredEntity) {
+            this.pressedEntity = this.hoveredEntity;
         }
     }
+    handlePointerUp = (event: EventType) => {
+        if (this.pressedEntity) {
+            const interactable = this.getInteractableFromEntity(this.pressedEntity);
+            if (interactable) {
+                console.log('@@@@ de-pressed ', this.pressedEntity?.id)
+                interactable.isPressed = false
+            }
+            if (this.pressedEntity === this.hoveredEntity) {
+                if (this.selectedEntity && this.selectedEntity !== this.pressedEntity) {
+                    console.log('@@@@ de-selected ', this.selectedEntity?.id)
+                    const interactable = this.getInteractableFromEntity(this.selectedEntity);
+                    if (interactable) {
+                        interactable.isSelected = false
+                    }
+                }
+                this.selectedEntity = this.pressedEntity;
+                const interactable = this.getInteractableFromEntity(this.selectedEntity);
+                if (interactable) {
+                    console.log('@@@@ selected ', this.selectedEntity?.id)
+                    interactable.isSelected = true
+                }
+            }
+        }
+        this.pressedEntity = null
+    }
+    handlePointerMove = (event: EventType) => {
+        this.updateRaycaster(event)
+        const entity = this.intersectEntity();
+        // handle hover in and out
+        if (this.hoveredEntity && this.hoveredEntity !== entity) {
+            // hover out
+            console.log('@@ hover out', this.hoveredEntity.id)
+            const interactable = this.hoveredEntity?.getComponent(InteractableComponent.name) as InteractableComponent
+            interactable.isHovered = false
+        }
+        if (entity && this.hoveredEntity !== entity) {
+            // hover in
+            console.log('@@ hover in', entity.id);
+            const interactable = entity?.getComponent(InteractableComponent.name) as InteractableComponent
+            interactable.isHovered = true
+        }
+        this.hoveredEntity = entity || null
+        console.log('@@@ pointer move', this.hoveredEntity?.id)
+    }
+    getInteractableFromEntity(entity: Entity): InteractableComponent | undefined {
+        return entity.getComponent(InteractableComponent.name) as InteractableComponent
+    }
+
     intersectByEntities(): Entity | undefined {
         const results: { distance: number, entity: Entity }[] = []
         this.query.execute().forEach(entity => {
