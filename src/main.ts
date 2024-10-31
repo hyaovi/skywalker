@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Engine, InteractableComponent } from "./ecs";
 
-import { setupStats } from "./ecs/utils/utils";
+import { createGalaxy, setupStats } from "./ecs/utils/utils";
 
 
 const engine = new Engine({
@@ -54,12 +54,17 @@ engine.subscribeOnce("engine-started", async () => {
     });
   document.querySelector("#app")?.appendChild(engine.viewport.domElement);
 
+  const galaxy = engine.manager.createEntity(createGalaxy(6000, 200,0xccccff  ));
+  engine.manager.activateEntity(galaxy)
+  engine.subscribe('engine-update', ()=>{
+    galaxy.sceneObject.rotation.y+=0.0001
+  })
 
   window.addEventListener("resize", () => {
     engine.viewport.resize();
   });
 
-
+engine.context.renderer.setClearColor(0x000000)
 
 });
 engine.run();

@@ -81,3 +81,39 @@ export function loopThroughMapValues<MapItemtype>(
   }
 }
 
+export function createGalaxy(starCount: number = 3000, radius: number, _color: number): THREE.Group {
+  const galaxy = new THREE.Group();
+  const geometry = new THREE.SphereGeometry();
+  const positions = new Float32Array(starCount * 3); // x, y, z for each star
+  const sizes = new Float32Array(starCount); // size for each star
+  const color = new THREE.Color(_color*Math.random());
+  for (let i = 0; i < starCount; i++) {
+    // Random position within a sphere
+    const phi = Math.random() * Math.PI * 2; // Angle around the y-axis
+    const theta = Math.acos(Math.random() * 2 - 1); // Angle from the y-axis
+    const x = radius * Math.sin(theta) * Math.cos(phi);
+    const y = radius * Math.sin(theta) * Math.sin(phi);
+    const z = radius * Math.cos(theta);
+    
+    
+
+      geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( color, 3 ) );
+
+      positions.set([x, y, z], i * 3);
+      sizes[i] = Math.random() * 2; // Random size for variation
+  }
+
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+  const material = new THREE.MeshStandardMaterial({
+      color,
+      // sizeAttenuation: true,
+      // size: 1* Math.random()+0.5, // Default size for the points
+  });
+
+  const stars = new THREE.Points(geometry, material);
+  galaxy.add(stars);
+
+  return galaxy;
+}
