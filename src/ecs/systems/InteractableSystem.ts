@@ -80,6 +80,11 @@ export class InteractableSystem extends System {
                     interactable.isSelected = true
                 }
             }
+            
+        }
+        if(this.selectedEntity !==this.pressedEntity){
+            console.log('@@@ deselected on empty spce ', this.selectedEntity?.id)
+            this.selectedEntity = null;
         }
         this.pressedEntity = null
     }

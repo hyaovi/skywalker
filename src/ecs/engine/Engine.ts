@@ -40,7 +40,7 @@ export class Engine extends Base implements ILifecycles {
   start(): void {
     if (this.started) return;
     this.manager.start()
-    this.loop.start((delta: number) => this.update(delta));
+    this.loop.start((delta: number,) => this.update(delta));
 
     this.started = true;
     this.broadcast(EVENT_NAMES.engineStarted);
