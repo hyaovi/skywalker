@@ -2,10 +2,10 @@ import * as THREE from "three";
 import { OrbitControls, TransformControls } from "three/examples/jsm/Addons.js";
 
 import { EVENT_NAMES } from "../base/EventManager";
-import { Object3DType, ObjectHelperType } from "../sharedTypes";
-import { Entity } from "../entities/Entity";
+import { MeshComponent } from "../components";
+import type { Entity } from "../entities/Entity";
+import type { Object3DType, ObjectHelperType } from "../sharedTypes";
 import { System } from "./System";
-import {  MeshComponent } from "../components";
 
 export interface IViewportParams {
   clearColor?: number | THREE.Color;
@@ -46,13 +46,13 @@ class Controls {
   settings: {
     useTransform?: boolean;
   } = {
-      useTransform: true,
-    };
+    useTransform: true,
+  };
 
   constructor(
     camera: THREE.Camera,
     domElement: HTMLCanvasElement,
-    settings: Controls["settings"] = {}
+    settings: Controls["settings"] = {},
   ) {
     this.settings = { ...this.settings, ...settings };
     this.orbit = new OrbitControls(camera, domElement);
@@ -63,7 +63,7 @@ class Controls {
     this.init();
   }
   init() {
-    this.transform?.addEventListener("dragging-changed", (event) => {
+    this.transform?.addEventListener("dragging-changed", event => {
       this.orbit.enabled = !event.value;
     });
   }
@@ -92,16 +92,16 @@ class Controls {
       this.transform?.detach?.();
     }
   }
-  update(_delta: number): void { }
+  update(_delta: number): void {}
   render(delta: number) {
     this.orbit.update(delta);
   }
 }
 
 export class ViewportSystem extends System {
-  useRenderOnDemand: boolean = false;
-  shouldRender: boolean = true;
-  inited: boolean = false;
+  useRenderOnDemand = false;
+  shouldRender = true;
+  inited = false;
 
   scene: THREE.Scene;
   sceneHelper: THREE.Scene;
@@ -130,13 +130,11 @@ export class ViewportSystem extends System {
     this.mixer = new THREE.AnimationMixer(this.scene);
     this.sceneHelper = new THREE.Scene();
 
-
     this.controls = new Controls(this.camera, this.domElement, {
       useTransform: this.settings.useTransformControls,
     });
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
-
   }
   get domElement() {
     return this.renderer.domElement;
@@ -147,7 +145,7 @@ export class ViewportSystem extends System {
       ...defaultViewportSetting,
       ...settings,
     };
-    this.resetSystem()
+    this.resetSystem();
   }
   resetSystem() {
     if (this.settings.useShadow) {
@@ -213,7 +211,7 @@ export class ViewportSystem extends System {
     }
   }
   removeEntityFromScene(entity: Entity) {
-    if (this.controls.transform?.object?.uuid == entity.sceneObject.uuid) {
+    if (this.controls.transform?.object?.uuid === entity.sceneObject.uuid) {
       this?.controls?.transform?.detach();
     }
     this.scene.remove(entity.sceneObject);
@@ -285,7 +283,7 @@ export class ViewportSystem extends System {
       const entity = this.getEntityById(selected.entityId);
 
       const objectCurrentlyAttached =
-        this.controls?.transform?.object?.uuid == selected.object.uuid;
+        this.controls?.transform?.object?.uuid === selected.object.uuid;
       switch (event.type) {
         case "click": {
           if (!objectCurrentlyAttached && entity) {
@@ -296,9 +294,9 @@ export class ViewportSystem extends System {
 
         case "pointermove": {
           if (entity && entity?.helper?.uuid !== this.highlightedHelper?.uuid) {
-            this.entities.forEach((entity) => {
-              this.controls.unHighlight(entity);
-            });
+           for (const entity of this.entities) {
+            this.controls.unHighlight(entity);
+           }
             this.controls.highlight(entity);
             this.highlightedHelper = entity?.helper;
           }
@@ -318,10 +316,10 @@ export class ViewportSystem extends System {
       }
     }
   }
-  createThrottledPointerEvent(timeout: number = 150) {
+  createThrottledPointerEvent(timeout = 150) {
     let lastimeInvoked = 0;
     return (event: PointerEvent | MouseEvent) => {
-      if (lastimeInvoked == 0) {
+      if (lastimeInvoked === 0) {
         this.pointerEventCallback(event);
         lastimeInvoked = event.timeStamp;
       } else {
@@ -332,5 +330,4 @@ export class ViewportSystem extends System {
       }
     };
   }
-
 }

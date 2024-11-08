@@ -2,6 +2,7 @@ type EventCallback<T> = (data: T) => void;
 type eventType = string;
 
 export class EventManager {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private _events: Map<string, Set<EventCallback<any>>> = new Map();
 
   // Subscribe to an event with a callback
@@ -9,26 +10,30 @@ export class EventManager {
     if (!this._events.has(event)) {
       this._events.set(event, new Set());
     }
-    this._events.get(event)!.add(callback as EventCallback<any>);
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    this._events.get(event)?.add(callback as EventCallback<any>);
   }
 
   // Unsubscribe from an event
   off<T>(event: eventType, callback: EventCallback<T>): void {
     if (!this._events.has(event)) return;
 
-    const callbacks = this._events.get(event)!;
-    callbacks.delete(callback as EventCallback<any>);
+    const callbacks = this._events.get(event);
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    callbacks?.delete(callback as EventCallback<any>);
 
-    if (callbacks.size === 0) {
+    if (callbacks?.size === 0) {
       this._events.delete(event);
     }
   }
 
   // Emit an event with data
   emit<T>(event: eventType, data?: T): void {
-    if (!this._events.has(event)) return;
-
-    this._events.get(event)!.forEach((callback) => callback(data));
+    const callbacks = this._events.get(event);
+    if (!callbacks) return;
+    for (const cb of callbacks) {
+      cb(data)
+    }
   }
 
   // Subscribe to an event with a callback that will be invoked only once
@@ -66,8 +71,8 @@ export const EVENT_NAMES = {
   engineStarted: "engine-started",
   engineUpdate: "engine-update",
 
-  requestNewEntity:'entity-manager-request-new-entity',
-  activateEntity:'entity-manager-request-new-entity',
+  requestNewEntity: 'entity-manager-request-new-entity',
+  activateEntity: 'entity-manager-request-new-entity',
 
   click: "click",
 };

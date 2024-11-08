@@ -1,8 +1,7 @@
-import * as THREE from "three";
 import Stats from "stats.js";
+import * as THREE from "three";
 import { EVENT_NAMES } from "../base";
-import { Engine } from "../engine";
-
+import type { Engine } from "../engine";
 
 export function _setupWorld(engine: Engine) {
   // engine.context.renderer.shadowMap.enabled = true;
@@ -70,18 +69,22 @@ export function setupStats(engine: Engine) {
 }
 
 export const sleep = async (time = 1000) =>
-  new Promise<void>((resolve) => setTimeout(resolve, time));
+  new Promise<void>(resolve => setTimeout(resolve, time));
 
 export function loopThroughMapValues<MapItemtype>(
   map: Map<string, MapItemtype>,
-  cb: (item: MapItemtype) => void
+  cb: (item: MapItemtype) => void,
 ) {
   for (const item of map.values()) {
     cb(item);
   }
 }
 
-export function createGalaxy(starCount: number = 3000, radius: number, _color: number): THREE.Group {
+export function createGalaxy(
+  starCount = 3000,
+  radius: number,
+  _color: number,
+): THREE.Group {
   const galaxy = new THREE.Group();
   const geometry = new THREE.SphereGeometry();
   const positions = new Float32Array(starCount * 3); // x, y, z for each star
@@ -95,15 +98,12 @@ export function createGalaxy(starCount: number = 3000, radius: number, _color: n
     const y = radius * Math.sin(theta) * Math.sin(phi);
     const z = radius * Math.cos(theta);
 
-
-
-
     positions.set([x, y, z], i * 3);
     sizes[i] = Math.random() * 2; // Random size for variation
   }
 
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
 
   const material = new THREE.MeshBasicMaterial({
     color,

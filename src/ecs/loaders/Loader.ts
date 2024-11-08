@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { GLTF } from "three/examples/jsm/Addons.js";
+import type { GLTF } from "three/examples/jsm/Addons.js";
 
 export class Loader {
   manager: THREE.LoadingManager;
@@ -39,7 +39,7 @@ export class Loader {
     return new Promise<GLTF>((resolve, reject) => {
       loader.load(
         url,
-        (data) => {
+        data => {
           loader?.dracoLoader?.dispose();
           loader?.ktx2Loader?.dispose();
           resolve(data);
@@ -47,7 +47,7 @@ export class Loader {
         undefined,
         (error: unknown) => {
           reject(error);
-        }
+        },
       );
     });
   }

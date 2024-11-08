@@ -1,1 +1,1 @@
-export {  globalLoader } from "./Loader";
+export { globalLoader } from "./Loader";

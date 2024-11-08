@@ -1,14 +1,14 @@
 import { Base } from "../base";
-import { Component } from "../components";
-import { Entity } from "../entities";
+import type { Component } from "../components";
+import type { Entity } from "../entities";
 import { manager } from "../managers";
 
-type componentTypeType = Component['componentType']
+type componentTypeType = Component["componentType"];
 export class System extends Base {
   id!: string;
   entities!: Entity[];
   getEntityById = manager.getEntityById.bind(manager);
-  needsUpdateCalls:boolean = false
+  needsUpdateCalls = false;
   readonly systemType: string;
   query = manager.getQuery();
 
@@ -26,10 +26,9 @@ export class System extends Base {
   }
 
   get componentsTypes() {
-    return this.query.componentTypes
+    return this.query.componentTypes;
   }
   set componentTypes(componentTypes: componentTypeType[]) {
-    this.query.setFilter(componentTypes)
+    this.query.setFilter(componentTypes);
   }
-
 }

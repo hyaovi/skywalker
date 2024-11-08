@@ -1,2 +1,2 @@
-export { manager } from './Manager';
-export { Query } from './Query'
+export { manager } from "./Manager";
+export { Query } from "./Query";

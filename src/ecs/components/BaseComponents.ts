@@ -1,31 +1,32 @@
-import { AnimationAction, } from "three";
+import type { AnimationAction } from "three";
 import { Base } from "../base";
-import { IPrimitiveParams } from "../sharedTypes";
-import { ILightParams } from "../utils/ObjectFactory";
+import type { IPrimitiveParams } from "../sharedTypes";
+import type { ILightParams } from "../utils/ObjectFactory";
 
 export interface IModelParams {
-  url: string
+  url: string;
 }
 export type meshParamsMapType = {
-  'model': IModelParams,
-  'primitive': IPrimitiveParams,
-  'light': ILightParams
-}
+  model: IModelParams;
+  primitive: IPrimitiveParams;
+  light: ILightParams;
+};
 export interface IMeshParams {
-  type: keyof meshParamsMapType,
-  params: IModelParams | IPrimitiveParams | ILightParams
+  type: keyof meshParamsMapType;
+  params: IModelParams | IPrimitiveParams | ILightParams;
 }
 export interface IAnimationParam {
-  name: string,
-  loop: boolean,
-  autoplay: boolean,
-  clampWhenFinished: boolean
+  name: string;
+  loop: boolean;
+  autoplay: boolean;
+  clampWhenFinished: boolean;
 }
 
 export class Component extends Base {
   id!: string;
   entityId!: string;
-  independant: boolean = false;
+  independant = false;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   data: Record<string, any>;
   readonly componentType: string;
   constructor() {
@@ -38,7 +39,7 @@ export class Component extends Base {
   }
   toJSON() {
     const { independant, data, componentType } = this;
-    return JSON.stringify({ independant, data, componentType, })
+    return JSON.stringify({ independant, data, componentType });
   }
 }
 
@@ -47,22 +48,22 @@ export class AnimationComponent extends Component {
   loop: boolean;
   autoplay: boolean;
   clampWhenFinished: boolean;
-  isSet: boolean = false;
-  action?: AnimationAction
+  isSet = false;
+  action?: AnimationAction;
   constructor(animation: IAnimationParam) {
-    super()
+    super();
     const { name, loop, autoplay, clampWhenFinished } = animation;
     this.name = name;
     this.autoplay = autoplay;
     this.loop = loop;
     this.clampWhenFinished = clampWhenFinished;
 
-    this.data.animation = animation
+    this.data.animation = animation;
   }
 }
 
 export class MeshComponent extends Component {
-  isSet: boolean = false;
+  isSet = false;
   constructor(params: IMeshParams) {
     super();
     this.data.params = params;
@@ -70,9 +71,9 @@ export class MeshComponent extends Component {
 }
 
 export class InteractableComponent extends Component {
-  isPressed: boolean = false
-  isSelected: boolean = false
-  isHovered: boolean = false
+  isPressed = false;
+  isSelected = false;
+  isHovered = false;
 
   // Custom events
   // onHoverEnter?: () => void;

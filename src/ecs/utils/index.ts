@@ -1,1 +1,1 @@
-export {loopThroughMapValues, _setupWorld, createGalaxy} from './utils'
+export { loopThroughMapValues, _setupWorld, createGalaxy } from "./utils";

@@ -4,7 +4,7 @@ type observableMapType<T> = Map<string, T>; // Adjust according to the actual ty
 
 export function makeObservableMap<T>(
   map: observableMapType<T>,
-  notify: (changeName: string) => void
+  notify: (changeName: string) => void,
 ) {
   return new Proxy(map, {
     get(target: observableMapType<T>, prop: PropertyKey, receiver: any) {
@@ -36,10 +36,10 @@ export function makeObservableMap<T>(
 
 export function createTimeableFunction(
   fn: () => void,
-  from: number = 0,
-  duration: number = 5000,
+  from = 0,
+  duration = 5000,
   autoInit = true,
-  debug = true
+  debug = true,
 ) {
   let stopId: any;
   let startId: any;
@@ -47,7 +47,7 @@ export function createTimeableFunction(
   let inited = false;
 
   const stop = () => {
-    [startId, stopId].forEach((id) => {
+    [startId, stopId].forEach(id => {
       if (id) clearTimeout(id);
     });
   };
@@ -93,7 +93,7 @@ class TestTimable {
       from,
       duration,
       false,
-      true
+      true,
     );
     meta.init();
     this.callback = proxiedFunction.bind(this);
