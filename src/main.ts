@@ -29,7 +29,7 @@ engine.subscribeOnce("engine-started", async () => {
   Array(10)
     .fill(null)
     .map(async (_, index) => {
-      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'sphere', color: 0xffccff * Math.random(), material: 'standard' })
+      const entity = await engine.manager.createEntityWithParams('primitive', { type: 'cylinder', color: 0xffccff * Math.random(), material: 'standard' })
       engine.manager.activateEntity(entity)
       entity.sceneObject.position.x = (index + 10) * Math.random() - 10;
       entity.sceneObject.position.z = (index + 10) * Math.random() - 10;

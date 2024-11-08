@@ -12,7 +12,7 @@ export abstract class Base implements ILifecycles {
   }
   init() {}
   start() {}
-  update(_delta: number) {}
+  update(_delta: number, _time:number) {}
   destroy() {}
   pause() {}
   resume() {}

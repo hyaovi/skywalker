@@ -105,10 +105,10 @@ class Manager extends Base {
     loopThroughMapValues(this.systems, system => system.start());
     loopThroughMapValues(this.entities, entities => entities.start());
   }
-  update(_delta: number): void {
+  update(delta: number, time:number): void {
     loopThroughMapValues(this.systems, system => {
       if (system.needsUpdateCalls) {
-        system.update(_delta);
+        system.update(delta, time);
       }
     });
   }

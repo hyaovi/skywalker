@@ -22,8 +22,8 @@ export class Loop {
   private loop() {
     const now = performance.now();
     this.delta = now - this.now;
-    this.loopCallback?.(this.delta);
     this.time += this.delta;
+    this.loopCallback?.(this.delta, this.time);
     this.now = now;
     this.rfId = requestAnimationFrame(this.loop);
   }

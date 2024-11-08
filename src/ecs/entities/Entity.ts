@@ -46,7 +46,9 @@ export class BaseEntity extends EventManager implements ILifecycles {
     this.loopOverComponents(component => component.start());
     this.started = true;
   }
-  update(_delta: number) {}
+  update(_delta: number, _time: number): void {
+    
+  }
   destroy() {
     this.loopOverComponents(component => component.destroy());
     this.components.clear();

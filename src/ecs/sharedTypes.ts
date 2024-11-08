@@ -18,12 +18,12 @@ export type ObjectHelperType =
   | THREE.SkeletonHelper
   | THREE.BoxHelper
   | undefined;
-export type LooperCallbackType = (delta: number) => void;
+export type LooperCallbackType = (delta: number, time:number) => void;
 
 export interface ILifecycles {
   init(): void;
   start(): void;
-  update(delta: number): void;
+  update(delta: number, time:number): void;
   pause(): void;
   destroy(): void;
   resume(): void;
